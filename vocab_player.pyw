@@ -50,7 +50,8 @@ DOC = resolve_doc()
 SPEAK_VBS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_speak.vbs")
 INTERVAL_MS = 10000
 TICK_MS = 50
-WIN_W, WIN_H = 640, 220
+MIN_SEC, MAX_SEC = 3, 30   # 速度滑块范围(秒)
+WIN_W, WIN_H = 640, 240
 
 # 全局热键 Ctrl+Alt+P
 WM_HOTKEY = 0x0312
@@ -117,6 +118,7 @@ class VocabPlayer:
         self.cur_en = ""
         self.hotkey_ok = False
         self._controls = set()   # 按钮/控件区,点击它们不触发切换/拖动
+        self.interval = INTERVAL_MS  # 当前展示间隔(ms)
 
         self._setup_window()
         self._build_ui()
@@ -206,12 +208,31 @@ class VocabPlayer:
         spk.pack(side="right")
         spk.bind("<Button-1>", lambda e: self.speak())
         self._controls.add(spk)
-        for txt, cmd in (("✕", self.quit), ("⏸", self.toggle_pause), ("⇻", self.next)):
+        for txt, cmd in (("✕", self.quit), ("⏸", self.toggle_pause), ("◀", self.prev), ("⇻", self.next)):
             b = tk.Label(bar, text=txt, fg="#888", bg="#202028",
                          font=("Segoe UI", 11), cursor="hand2", padx=6)
             b.pack(side="right")
             b.bind("<Button-1>", lambda e, c=cmd: c())
             self._controls.add(b)
+
+        # 速度滑块行
+        spd = tk.Frame(r, bg="#202028")
+        spd.pack(fill="x", padx=16, pady=(0, 0))
+        self._controls.add(spd)
+        tk.Label(spd, text="⏱", fg="#666", bg="#202028",
+                 font=("Segoe UI", 9)).pack(side="left")
+        self.speed_var = tk.IntVar(value=INTERVAL_MS // 1000)
+        self.speed_scale = tk.Scale(spd, from_=MIN_SEC, to=MAX_SEC,
+                                    orient="horizontal", variable=self.speed_var,
+                                    command=self._on_speed, showvalue=True,
+                                    length=200, sliderlength=18,
+                                    bg="#202028", fg="#888", troughcolor="#333",
+                                    highlightthickness=0, bd=0,
+                                    font=("Segoe UI", 8))
+        self.speed_scale.pack(side="left", padx=(2, 4))
+        tk.Label(spd, text="秒/词", fg="#666", bg="#202028",
+                 font=("Segoe UI", 9)).pack(side="left")
+        self._controls.add(self.speed_scale)
 
         self.lbl_en = tk.Label(r, text="", fg="#ffffff", bg="#202028",
                               font=("Segoe UI", 18, "bold"), anchor="w",
@@ -278,6 +299,9 @@ class VocabPlayer:
     def toggle_pause(self):
         self.paused = not self.paused
 
+    def _on_speed(self, val):
+        self.interval = int(val) * 1000
+
     def quit(self):
         if self.after_id:
             self.root.after_cancel(self.after_id)
@@ -287,8 +311,8 @@ class VocabPlayer:
     def tick(self):
         if not self.paused:
             self.progress += TICK_MS
-            self.bar["value"] = min(100, self.progress / INTERVAL_MS * 100)
-            if self.progress >= INTERVAL_MS:
+            self.bar["value"] = min(100, self.progress / self.interval * 100)
+            if self.progress >= self.interval:
                 self.next()
         self.after_id = self.root.after(TICK_MS, self.tick)
 
