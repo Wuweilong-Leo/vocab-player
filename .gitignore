@@ -1,0 +1,16 @@
+# 学习文档(二进制,不纳入版本控制)
+*.docx
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 临时语音脚本(运行时生成)
+_speak.vbs
+
+# Claude Code 项目配置
+.claude/
+
+# OS 生成
+Thumbs.db
+Desktop.ini
