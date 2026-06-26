@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 单词轮播小工具 (含按键发音)
-- 从 D:/wwl/英语学习文档_整理版.docx 读取词条(分类表,表头为"英文")
+- 从学习文档(.docx)读取词条(分类表,表头为"英文")
 - 置顶无边框小窗口,10 秒自动切换,随机顺序加深印象
 - 一轮播完自动重新读取文档(可拾取新增词条)并重新打乱
 发音:
@@ -15,6 +15,10 @@
   左键拖动      = 移动窗口
   空格          = 暂停/继续
   Esc 或点 ×    = 退出
+文档路径(优先级):
+  1. 命令行参数 --doc <路径>
+  2. 环境变量 VOCAB_DOC
+  3. 脚本同目录下的 英语学习文档_整理版.docx
 """
 import os
 import re
@@ -27,8 +31,23 @@ import tkinter as tk
 from tkinter import ttk
 from docx import Document
 
-DOC = r"D:/wwl/英语学习文档_整理版.docx"
-SPEAK_VBS = r"D:/wwl/_speak.vbs"
+def resolve_doc():
+    """按优先级解析文档路径: --doc 参数 > VOCAB_DOC 环境变量 > 同目录默认名"""
+    import argparse
+    ap = argparse.ArgumentParser(add_help=False)
+    ap.add_argument("--doc", default=None)
+    a, _ = ap.parse_known_args()
+    if a.doc:
+        return os.path.abspath(a.doc)
+    env = os.environ.get("VOCAB_DOC")
+    if env:
+        return os.path.abspath(env)
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        "英语学习文档_整理版.docx")
+
+
+DOC = resolve_doc()
+SPEAK_VBS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_speak.vbs")
 INTERVAL_MS = 10000
 TICK_MS = 50
 WIN_W, WIN_H = 640, 220
