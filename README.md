@@ -12,6 +12,7 @@ Windows 英语单词轮播小工具，开机自动运行，定时轮播学习文
 - 📌 **置顶悬浮** — 无边框半透明窗口，不遮挡工作
 - ▶◀ **手动切词** — 上一个/下一个按钮，左键/右键点击
 - 🔢 **序号显示** — 当前第几个 / 共多少个词条
+- 🔍 **模糊搜索** — 输入关键词即时模糊匹配，拼写容错
 - 🚀 **开机自启** — 桌面快捷方式 + Startup 文件夹
 
 ## 操作
@@ -23,6 +24,9 @@ Windows 英语单词轮播小工具，开机自动运行，定时轮播学习文
 | 移动窗口 | 左键拖动 |
 | 朗读当前词 | 🔊 按钮 / P 键 / Ctrl+Alt+P |
 | 暂停/继续 | 空格 / ⏸ 按钮 / 鼠标中键 |
+| 搜索 | 🔍 按钮 / Ctrl+F |
+| 下一个匹配 | Enter（搜索模式下） |
+| 关闭搜索 | Esc / 再点 🔍 |
 | 退出 | Esc / ✕ 按钮 |
 
 ## 文档格式
@@ -37,10 +41,10 @@ Windows 英语单词轮播小工具，开机自动运行，定时轮播学习文
 
 ### 前置依赖
 
-- Python 3.x + `python-docx`
+- Python 3.x + `python-docx` + `thefuzz`
 
 ```bash
-pip install python-docx
+pip install python-docx thefuzz
 ```
 
 ### 运行
@@ -85,6 +89,7 @@ pythonw vocab_player.pyw
 ## 技术细节
 
 - **发音**：`wscript.exe` + VBScript 调用 `SAPI.SpVoice` COM，无需安装额外依赖
+- **搜索**：`thefuzz` 库实现 Levenshtein 距离模糊匹配，拼写容错
 - **全局热键**：`ctypes.user32.RegisterHotKey` 注册 Ctrl+Alt+P
 - **UI**：tkinter 无边框置顶窗口（`overrideredirect` + `-topmost`）
 
