@@ -125,7 +125,7 @@ class SearchBar:
 
         def _select_entry(sel_idx):
             entry_idx = self._hits[sel_idx]
-            self._on_select(entry_idx)
+            self._on_select(entry_idx, final=True)
             self.clear()
 
         lb.bind("<ButtonRelease-1>", lambda e: _select_entry(lb.curselection()[0])
@@ -147,10 +147,10 @@ class SearchBar:
             lb.selection_set(nxt)
             lb.activate(nxt)
             lb.see(nxt)
-            self._on_select(self._hits[nxt])  # 预览
+            self._on_select(self._hits[nxt], final=False)  # 预览
 
         self.entry.bind("<Down>", lambda e: (_nav(1), "break")[1])
         self.entry.bind("<Up>", lambda e: (_nav(-1), "break")[1])
 
         # 初始预览第一项
-        self._on_select(self._hits[0])
+        self._on_select(self._hits[0], final=False)

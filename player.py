@@ -182,21 +182,21 @@ class VocabPlayer:
         self.paused = not self.paused
 
     # ---------- 搜索回调 ----------
-    def _on_search_select(self, entry_idx):
-        """搜索选中/预览词条:更新主显示区,选中时跳转位置"""
+    def _on_search_select(self, entry_idx, final=False):
+        """搜索回调:预览或选中词条"""
         en, zh, usage = self.entries[entry_idx]
         self.cur_en = en
         self.lbl_en.config(text=en)
         self.lbl_zh.config(text=zh)
         self.lbl_usage.config(text=usage)
-        # 选中(非预览)时跳转:搜索框 clear 后会调用,此时 _hits 已清空
-        if not self.search._hits:
+        if final:
+            # 确认选中:跳转轮播位置
             if entry_idx in self.order:
                 self.pos = self.order.index(entry_idx)
             self.progress = 0
             self.bar["value"] = 0
         else:
-            # 预览模式:更新序号
+            # 预览:更新序号
             sel_in_hits = self.search._hits.index(entry_idx) if entry_idx in self.search._hits else 0
             self.lbl_pos.config(text=f"搜索 {sel_in_hits + 1}/{len(self.search._hits)}")
 
